@@ -1,11 +1,7 @@
 // Camada de persistência local do EstudoFlow.
 //
-// Substitui o Supabase: todos os dados (matérias, assuntos, streak,
-// configurações) ficam em uma única chave do localStorage
-// ("estudoflow.v1"). O padrão usado aqui (subscribe/getSnapshot) é o
-// exigido pelo `useSyncExternalStore` do React, então qualquer componente
-// que use o hook `useAppData` é notificado automaticamente quando os
-// dados mudam — sem precisar de um gerenciador de estado externo.
+// Todos os dados (matérias, assuntos, streak, configurações) ficam em
+// uma única chave do localStorage ("estudoflow.v1")...
 
 import type {
   AppData,

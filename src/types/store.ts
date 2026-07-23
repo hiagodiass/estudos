@@ -1,7 +1,5 @@
-// Tipos do modelo de dados local (localStorage). Substitui o antigo
-// `types/database.ts` (Supabase) — o Módulo 1 agora funciona 100% no
-// navegador, sem backend.
-
+// Tipos do modelo de dados local (localStorage).
+// O app funciona 100% no navegador, sem backend.
 export type TopicStatus = "pendente" | "estudando" | "revisao" | "concluido";
 
 export interface Subject {
