@@ -1,39 +1,37 @@
 # EstudoFlow
 
-Sistema pessoal de acompanhamento de estudos. Módulo 1: setup base.
+Sistema pessoal de acompanhamento de estudos.
 
 ## Como rodar
 
 1. Instale as dependências:
-   ```bash
+```bash
    npm install
-   ```
-2. Copie o arquivo de variáveis de ambiente e preencha com as credenciais do seu projeto Supabase:
-   ```bash
-   cp .env.example .env
-   ```
-3. Rode o servidor de desenvolvimento:
-   ```bash
+```
+2. Rode o servidor de desenvolvimento:
+```bash
    npm run dev
-   ```
+```
 
 O app abre em `http://localhost:5173`.
 
-> Neste módulo o Supabase ainda não é usado por nenhuma tela — a configuração
-> do client já está pronta para os próximos módulos (CRUD de Matérias e
-> Assuntos), mas as variáveis de ambiente precisam existir para o app compilar
-> sem erro de runtime.
+> O app funciona 100% localmente, salvando os dados no armazenamento do
+> próprio navegador — não depende de nenhum serviço externo (Supabase ou
+> outro banco na nuvem).
 
 ## Estrutura
 
 ```
 src/
 ├── components/
-│   ├── ui/          # Componentes base (Button, Card) — padrão shadcn/ui
+│   ├── dashboard/    # Componentes do painel principal
+│   ├── subjects/     # Componentes de matérias
+│   ├── topics/       # Componentes de tópicos
+│   ├── ui/           # Componentes base (Button, Card) — padrão shadcn/ui
 │   └── layout/       # Sidebar, PageContainer
-├── features/         # Hooks e lógica por domínio (vazio por enquanto)
-├── lib/              # Supabase client, utilitário cn()
-├── pages/            # Dashboard, Subjects, Settings
+├── hooks/            # Hooks customizados
+├── lib/              # Store local (persistência no navegador), utilitários
+├── pages/            # Dashboard, Subjects, Settings, SubjectDetail
 ├── routes/           # Definição de rotas
-└── types/            # Tipos do banco (placeholder até criarmos as tabelas)
+└── types/            # Tipos usados no app
 ```
