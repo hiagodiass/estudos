@@ -13,7 +13,7 @@ import { useSeo } from "@/lib/seo";
 const CONFIRM_WORD = "apagar";
 
 export default function Settings() {
-  useSeo("Configurações", "Preferências e dados do EstudoFlow.");
+  useSeo("Configurações", "Preferências e dados do EstudoH.");
 
   const {
     subjects,
@@ -111,7 +111,7 @@ export default function Settings() {
     const a = document.createElement("a");
     const date = new Date().toISOString().slice(0, 10);
     a.href = url;
-    a.download = `estudoflow-backup-${date}.json`;
+    a.download = `estudoH-backup-${date}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -128,9 +128,9 @@ export default function Settings() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const text = String(reader.result ?? "");
-      const result = importData(text);
+      const result = await importData(text);
       if (result.ok) {
         setImportError(null);
         setImportSuccess(true);
@@ -154,7 +154,7 @@ export default function Settings() {
             <GraduationCap size={16} />
           </div>
           <div className="text-sm">
-            <p className="font-medium text-foreground">EstudoFlow</p>
+            <p className="font-medium text-foreground">EstudoH</p>
             <p className="text-muted">Versão 0.2 · uso local</p>
           </div>
         </CardContent>

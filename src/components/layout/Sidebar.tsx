@@ -1,7 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BookOpen, Settings, GraduationCap, Flame } from "lucide-react";
+import { LayoutDashboard, BookOpen, Settings, GraduationCap, Flame, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { useAppData } from "@/hooks/useAppData";
+
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -11,6 +13,7 @@ const navItems = [
 
 export function Sidebar() {
   const { streak } = useAppData();
+  const { signOut, user } = useAuth();
 
   const hasActiveStreak = streak.count > 0;
 
@@ -21,7 +24,7 @@ export function Sidebar() {
           <GraduationCap size={18} />
         </div>
         <div>
-          <p className="text-sm font-semibold leading-tight">EstudoFlow</p>
+          <p className="text-sm font-semibold leading-tight">EstudoH</p>
           <p className="text-xs text-muted-foreground">Foco no que importa</p>
         </div>
       </div>
@@ -68,6 +71,16 @@ export function Sidebar() {
             : "Conclua um assunto hoje para começar sua sequência."}
         </p>
       </div>
+      <div className="mx-3 mb-3 flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2.5">
+  <p className="truncate text-xs text-muted">{user?.email}</p>
+  <button
+    onClick={() => signOut()}
+    aria-label="Sair"
+    className="shrink-0 rounded-md p-1 text-muted transition-colors hover:bg-surface-hover hover:text-destructive"
+  >
+    <LogOut size={14} />
+  </button>
+</div>
 
       <div className="px-5 py-4 text-xs text-muted-foreground">
         <p>Versão 0.2 · Uso local</p>

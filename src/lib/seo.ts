@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 /**
  * SEO simples por rota, sem dependências extras: define o <title> e a
- * meta description a cada página. Como o EstudoFlow é uma SPA de uso
+ * meta description a cada página. Como o EstudoH é uma SPA de uso
  * pessoal/local, isso é suficiente — não precisamos de SSR nem de tags
  * Open Graph dinâmicas.
  */
