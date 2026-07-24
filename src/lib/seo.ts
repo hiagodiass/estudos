@@ -9,7 +9,7 @@ import { useEffect } from "react";
 export function useSeo(title: string, description?: string) {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = `${title} · EstudoFlow`;
+    document.title = `${title} · EstudoH`;
 
     let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     const previousDescription = meta?.getAttribute("content") ?? null;
