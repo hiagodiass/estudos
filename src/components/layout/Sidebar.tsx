@@ -83,7 +83,7 @@ export function Sidebar() {
 </div>
 
       <div className="px-5 py-4 text-xs text-muted-foreground">
-        <p>Versão 0.2 · Uso local</p>
+        <p>Versão 0.2 · Online</p>
       </div>
     </aside>
   );

@@ -155,7 +155,7 @@ export default function Settings() {
           </div>
           <div className="text-sm">
             <p className="font-medium text-foreground">EstudoH</p>
-            <p className="text-muted">Versão 0.2 · uso local</p>
+            <p className="text-muted">Versão 0.2 · Online</p>
           </div>
         </CardContent>
       </Card>
