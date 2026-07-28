@@ -24,8 +24,15 @@ const EMPTY_STATUS_COUNTS: Record<TopicStatus, number> = {
 export default function Dashboard() {
   useSeo("Dashboard", "Visão geral do seu progresso nos estudos.");
 
-  const { subjects, topics, settings, createTopic, updateTopicStatus, deleteTopic } =
-    useAppData();
+  const {
+    subjects,
+    topics,
+    settings,
+    createTopic,
+    updateTopicStatus,
+    deleteTopic,
+    markTopicReviewed,
+  } = useAppData();
 
   const weeks = useMemo(() => {
     const set = new Set<number>(topics.map((t) => t.week));
@@ -124,7 +131,11 @@ export default function Dashboard() {
 
         <div className="space-y-4">
           <StatusOverview counts={statusCounts} total={totalWeekTopics} />
-          <UpcomingReviews topics={topics} subjects={subjects} />
+          <UpcomingReviews
+            topics={topics}
+            subjects={subjects}
+            onMarkReviewed={markTopicReviewed}
+          />
         </div>
       </div>
 

@@ -140,6 +140,14 @@ export async function deleteTopic(id: string) {
   if (error) throw error;
 }
 
+export async function markTopicReviewed(id: string) {
+  const { error } = await supabase
+    .from("topics")
+    .update({ review_at: null, updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 // ---------- Settings ----------
 
 export async function upsertSettings(userId: string, input: Partial<AppSettings>) {

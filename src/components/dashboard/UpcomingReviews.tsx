@@ -1,25 +1,31 @@
+import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import type { Subject, Topic } from "@/types/store";
 
 interface UpcomingReviewsProps {
   topics: Topic[];
   subjects: Subject[];
+  onMarkReviewed: (topicId: string) => void;
 }
 
-function formatReviewDate(iso: string): string {
+function formatReviewDate(iso: string): { label: string; late: boolean } {
   const date = new Date(iso);
   const today = new Date();
   const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   const diffDays = Math.round((startOfDay(date) - startOfDay(today)) / (1000 * 60 * 60 * 24));
 
-  if (diffDays < 0) return "Atrasada";
-  if (diffDays === 0) return "Hoje";
-  if (diffDays === 1) return "Amanhã";
-  return `Em ${diffDays} dias`;
+  if (diffDays < 0) return { label: "Atrasada", late: true };
+  if (diffDays === 0) return { label: "Hoje", late: false };
+  if (diffDays === 1) return { label: "Amanhã", late: false };
+  return { label: `Em ${diffDays} dias`, late: false };
 }
 
-/** Lista os próximos assuntos agendados para revisão (concluídos há ~7 dias). */
-export function UpcomingReviews({ topics, subjects }: UpcomingReviewsProps) {
+/** Lista os próximos assuntos agendados para revisão (concluídos há ~7 dias).
+ *  Mostra sempre os 6 mais próximos; ao marcar como revisado, o item some
+ *  daqui e o próximo da fila sobe automaticamente (reviewAt é limpo, sem
+ *  mexer no status nem no completedAt do assunto). */
+export function UpcomingReviews({ topics, subjects, onMarkReviewed }: UpcomingReviewsProps) {
   const scheduled = topics
     .filter((t): t is Topic & { reviewAt: string } => Boolean(t.reviewAt))
     .sort((a, b) => new Date(a.reviewAt).getTime() - new Date(b.reviewAt).getTime())
@@ -40,6 +46,8 @@ export function UpcomingReviews({ topics, subjects }: UpcomingReviewsProps) {
           <ul className="space-y-1">
             {scheduled.map((topic) => {
               const subject = subjects.find((s) => s.id === topic.subjectId);
+              const { label, late } = formatReviewDate(topic.reviewAt);
+
               return (
                 <li
                   key={topic.id}
@@ -55,9 +63,22 @@ export function UpcomingReviews({ topics, subjects }: UpcomingReviewsProps) {
                       <p className="truncate text-xs text-muted">{subject?.name ?? "Sem matéria"}</p>
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-muted">
-                    {formatReviewDate(topic.reviewAt)}
-                  </span>
+
+                  <div className="flex shrink-0 items-center gap-2.5">
+                    <span className={late ? "text-xs font-medium text-destructive" : "text-xs text-muted"}>
+                      {label}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted hover:text-status-concluido"
+                      onClick={() => onMarkReviewed(topic.id)}
+                      aria-label={`Marcar "${topic.name}" como revisado`}
+                      title="Marcar como revisado"
+                    >
+                      <CheckCircle2 size={16} />
+                    </Button>
+                  </div>
                 </li>
               );
             })}

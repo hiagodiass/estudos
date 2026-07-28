@@ -62,6 +62,10 @@ export function useAppData() {
     mutationFn: (id: string) => api.deleteTopic(id),
     onSuccess: invalidateAll,
   });
+  const markTopicReviewedMut = useMutation({
+    mutationFn: (id: string) => api.markTopicReviewed(id),
+    onSuccess: invalidateAll,
+  });
 
   const updateSettingsMut = useMutation({
     mutationFn: (input: Partial<AppSettings>) => api.upsertSettings(userId, input),
@@ -97,6 +101,7 @@ export function useAppData() {
     updateTopicStatus: (topicId: string, status: TopicStatus) =>
       updateTopicStatusMut.mutate({ topicId, status }),
     deleteTopic: (id: string) => deleteTopicMut.mutate(id),
+    markTopicReviewed: (id: string) => markTopicReviewedMut.mutate(id),
 
     updateSettings: (input: Partial<AppSettings>) => updateSettingsMut.mutate(input),
     setWeeklyGoalForWeek: (week: number, goal: number) => setWeeklyGoalMut.mutate({ week, goal }),
