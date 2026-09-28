@@ -8,7 +8,10 @@ export function useAppData() {
   const userId = user!.id; // seguro: useAppData só é usado dentro de RequireAuth
   const queryClient = useQueryClient();
 
-  const subjectsQuery = useQuery({ queryKey: ["subjects", userId], queryFn: api.fetchSubjects });
+  const subjectsQuery = useQuery({
+    queryKey: ["subjects", userId],
+    queryFn: () => api.fetchSubjects(userId),
+  });
   const topicsQuery = useQuery({ queryKey: ["topics", userId], queryFn: api.fetchTopics });
   const settingsQuery = useQuery({
     queryKey: ["settings", userId],
@@ -76,10 +79,6 @@ export function useAppData() {
       api.setWeeklyGoalForWeek(userId, vars.week, vars.goal),
     onSuccess: invalidateAll,
   });
-  const resetAllMut = useMutation({
-    mutationFn: () => api.resetAllData(userId),
-    onSuccess: invalidateAll,
-  });
 
   return {
     subjects: subjectsQuery.data ?? [],
@@ -105,29 +104,43 @@ export function useAppData() {
 
     updateSettings: (input: Partial<AppSettings>) => updateSettingsMut.mutate(input),
     setWeeklyGoalForWeek: (week: number, goal: number) => setWeeklyGoalMut.mutate({ week, goal }),
-    resetAll: () => resetAllMut.mutate(),
+    resetAll: async () => {
+      try {
+        await api.resetAllData(userId);
+        return { ok: true as const };
+      } catch (err) {
+        return { ok: false as const, error: errorMessage(err, "Erro ao apagar os dados.") };
+      } finally {
+        // Mesmo com erro, parte dos dados pode ter sido apagada: recarrega a tela.
+        invalidateAll();
+      }
+    },
 
-    exportData: () =>
-      JSON.stringify(
-        {
-          version: 1,
-          subjects: subjectsQuery.data ?? [],
-          topics: topicsQuery.data ?? [],
-          settings: settingsQuery.data,
-          streak: streakQuery.data,
-        },
-        null,
-        2
-      ),
+    exportData: async () => {
+      try {
+        return { ok: true as const, json: await api.exportBackup(userId) };
+      } catch (err) {
+        return { ok: false as const, error: errorMessage(err, "Erro ao exportar.") };
+      }
+    },
 
     importData: async (json: string) => {
       try {
         await api.importBackup(userId, json);
-        invalidateAll();
         return { ok: true as const };
       } catch (err) {
-        return { ok: false as const, error: err instanceof Error ? err.message : "Erro ao importar." };
+        return { ok: false as const, error: errorMessage(err, "Erro ao importar.") };
+      } finally {
+        invalidateAll();
       }
     },
   };
+}
+
+/** Erros do Supabase não são instâncias de Error, mas trazem `message`. */
+function errorMessage(err: unknown, fallback: string): string {
+  if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
+    return err.message;
+  }
+  return fallback;
 }

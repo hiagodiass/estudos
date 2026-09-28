@@ -31,9 +31,14 @@ export default function Settings() {
   const [defaultGoalInput, setDefaultGoalInput] = useState(String(settings.weeklyGoal));
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const totalSubjects = subjects.length;
+  const totalTopics = topics.length;
   const canConfirm = confirmText.trim().toLowerCase() === CONFIRM_WORD;
 
   // ---- Meta padrão (usada por semanas sem meta própria) ----
@@ -97,15 +102,27 @@ export default function Settings() {
     setConfirmText("");
   }
 
-  function handleConfirmDelete() {
-    if (!canConfirm) return;
-    resetAll();
+  async function handleConfirmDelete() {
+    if (!canConfirm || isResetting) return;
+    setIsResetting(true);
+    setResetError(null);
+    setResetSuccess(false);
+    const result = await resetAll();
+    setIsResetting(false);
     setIsConfirming(false);
     setConfirmText("");
+    if (result.ok) setResetSuccess(true);
+    else setResetError(result.error);
   }
 
-  function handleExport() {
-    const json = exportData();
+  async function handleExport() {
+    setExportError(null);
+    const result = await exportData();
+    if (!result.ok) {
+      setExportError(result.error);
+      return;
+    }
+    const json = result.json;
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -269,8 +286,9 @@ export default function Settings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted">
-            Exporte todos os seus dados (matérias, assuntos, streak e configurações) em
-            um arquivo JSON, ou importe um backup salvo anteriormente.
+            Exporte todos os seus dados (matérias com os seus assuntos, streak e
+            configurações) em um arquivo JSON, ou importe um backup salvo anteriormente.
+            A importação substitui os dados atuais.
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="secondary" onClick={handleExport}>
@@ -293,6 +311,9 @@ export default function Settings() {
             <p className="text-sm text-status-concluido">Dados importados com sucesso.</p>
           )}
           {importError && <p className="text-sm text-destructive">{importError}</p>}
+          {exportError && (
+            <p className="text-sm text-destructive">Erro ao exportar: {exportError}</p>
+          )}
         </CardContent>
       </Card>
 
@@ -302,16 +323,21 @@ export default function Settings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted">
-            Apaga permanentemente todas as matérias, assuntos, streak e revisões
-            agendadas. Essa ação não pode ser desfeita.
+            Apaga permanentemente todos os assuntos, as matérias, a streak, as revisões
+            agendadas, a data da prova e as metas. As matérias fixas (Português,
+            Raciocínio Lógico e TI) continuam, mas ficam vazias. Essa ação não pode ser
+            desfeita.
           </p>
 
           {!isConfirming ? (
             <Button
               size="sm"
               variant="destructive"
-              disabled={totalSubjects === 0}
-              onClick={() => setIsConfirming(true)}
+              onClick={() => {
+                setResetError(null);
+                setResetSuccess(false);
+                setIsConfirming(true);
+              }}
             >
               <AlertTriangle size={14} />
               Apagar todos os dados
@@ -320,8 +346,9 @@ export default function Settings() {
             <div className="space-y-3 rounded-md bg-destructive/10 p-4">
               <p className="text-sm text-foreground">
                 Digite <span className="font-mono font-semibold">{CONFIRM_WORD}</span> para
-                confirmar a exclusão de {totalSubjects}{" "}
-                {totalSubjects === 1 ? "matéria" : "matérias"} e todos os seus assuntos.
+                confirmar a exclusão de {totalTopics}{" "}
+                {totalTopics === 1 ? "assunto" : "assuntos"}, das matérias não fixas
+                ({totalSubjects} no total, contando as fixas) e de todas as configurações.
               </p>
 
               <Label htmlFor="confirm-delete" className="sr-only">
@@ -340,16 +367,24 @@ export default function Settings() {
                 <Button
                   size="sm"
                   variant="destructive"
-                  disabled={!canConfirm}
+                  disabled={!canConfirm || isResetting}
                   onClick={handleConfirmDelete}
                 >
-                  Confirmar exclusão
+                  {isResetting ? "Apagando..." : "Confirmar exclusão"}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={handleCancelReset}>
                   Cancelar
                 </Button>
               </div>
             </div>
+          )}
+          {resetSuccess && (
+            <p className="text-sm text-status-concluido">Dados apagados com sucesso.</p>
+          )}
+          {resetError && (
+            <p className="text-sm text-destructive">
+              Erro ao apagar: {resetError}. Parte dos dados pode ter sido apagada; tente de novo.
+            </p>
           )}
         </CardContent>
       </Card>
