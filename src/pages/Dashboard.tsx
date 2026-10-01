@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { BookOpen, ListChecks, TrendingUp, Target, Plus, Calendar } from "lucide-react";
+import { BookOpen, ListChecks, TrendingUp, Target, Plus, Calendar, ListPlus } from "lucide-react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { StatusOverview } from "@/components/dashboard/StatusOverview";
 import { WeekOverview } from "@/components/dashboard/WeekOverview";
 import { UpcomingReviews } from "@/components/dashboard/UpcomingReviews";
 import { NewTopicDialog } from "@/components/dashboard/NewTopicDialog";
+import { ImportTopicsDialog } from "@/components/dashboard/ImportTopicsDialog";
 import { ExamCountdown } from "@/components/dashboard/ExamCountdown";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -29,6 +30,7 @@ export default function Dashboard() {
     topics,
     settings,
     createTopic,
+    createTopics,
     updateTopicStatus,
     deleteTopic,
     markTopicReviewed,
@@ -42,6 +44,7 @@ export default function Dashboard() {
 
   const [selectedWeek, setSelectedWeek] = useState(weeks[0]);
   const [isCreating, setIsCreating] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   // Se a semana selecionada deixou de existir (ex: depois de apagar dados),
   // volta para a primeira semana disponível.
@@ -93,6 +96,10 @@ export default function Dashboard() {
               </span>
             )}
           />
+          <Button size="sm" variant="secondary" onClick={() => setIsImporting(true)}>
+            <ListPlus size={16} />
+            Importar lista
+          </Button>
           <Button size="sm" onClick={() => setIsCreating(true)}>
             <Plus size={16} />
             Novo assunto
@@ -145,6 +152,15 @@ export default function Dashboard() {
         subjects={subjects}
         defaultWeek={currentWeek}
         onCreate={createTopic}
+      />
+
+      <ImportTopicsDialog
+        open={isImporting}
+        onClose={() => setIsImporting(false)}
+        subjects={subjects}
+        topics={topics}
+        defaultWeek={currentWeek}
+        onImport={createTopics}
       />
     </PageContainer>
   );

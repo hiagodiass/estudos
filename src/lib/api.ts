@@ -180,6 +180,27 @@ export async function createTopic(
   if (error) throw error;
 }
 
+/** Cria vários assuntos de uma vez (importação de lista). O created_at é
+ *  escalonado em 1ms por linha para os assuntos manterem a ordem da lista. */
+export async function createTopics(
+  userId: string,
+  inputs: { subjectId: string; name: string; week: number }[]
+) {
+  const start = Date.now();
+  const rows = inputs.map((input, i) => ({
+    user_id: userId,
+    subject_id: input.subjectId,
+    name: input.name,
+    week: input.week > 0 ? Math.floor(input.week) : 1,
+    status: "pendente",
+    created_at: new Date(start + i).toISOString(),
+  }));
+  for (let i = 0; i < rows.length; i += INSERT_CHUNK_SIZE) {
+    const { error } = await supabase.from("topics").insert(rows.slice(i, i + INSERT_CHUNK_SIZE));
+    if (error) throw error;
+  }
+}
+
 export async function updateTopic(
   id: string,
   input: Partial<{ name: string; subjectId: string; week: number }>

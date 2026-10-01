@@ -95,6 +95,17 @@ export function useAppData() {
 
     createTopic: (input: { subjectId: string; name: string; week: number }) =>
       createTopicMut.mutate(input),
+    createTopics: async (inputs: { subjectId: string; name: string; week: number }[]) => {
+      try {
+        await api.createTopics(userId, inputs);
+        return { ok: true as const };
+      } catch (err) {
+        return { ok: false as const, error: errorMessage(err, "Erro ao importar a lista.") };
+      } finally {
+        // Mesmo com erro, um bloco pode ter sido salvo: recarrega a tela.
+        invalidateAll();
+      }
+    },
     updateTopic: (id: string, input: Partial<{ name: string; subjectId: string; week: number }>) =>
       updateTopicMut.mutate({ id, input }),
     updateTopicStatus: (topicId: string, status: TopicStatus) =>
